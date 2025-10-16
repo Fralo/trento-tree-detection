@@ -1,0 +1,3 @@
+deepforest==1.4.0
+albumentations==1.4.24
+# Pin versions for compatibility: deepforest 1.4.0 relies on albumentations functional API removed/changed in 2.x

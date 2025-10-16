@@ -1,0 +1,19 @@
+data:
+  raw_data_dir: "data/01_raw/label-studio-export/images/"
+  processed_data_dir: "data/02_processed/"
+  annotations_file: "data/02_processed/deepforest_annotations.csv"
+
+model:
+  pretrained_model_name: "weecology/deepforest-tree"
+  pretrained_model_revision: "main"
+  checkpoint_dir: "models/checkpoints"
+  final_model_path: "models/final_model.pt"
+
+training:
+  accelerator: "mps" # or "gpu", "cpu"
+  devices: 1
+  max_epochs: 20
+  val_loss_monitor: "val_loss"
+
+prediction:
+  score_thresh: 0.3
