@@ -22,15 +22,15 @@ def train():
         revision=model_config["pretrained_model_revision"]
     )
 
-    # Configure training data
+    # Loads the training and validation data configuration
     model.config["train"]["csv_file"] = data_config["annotations_file"]
     model.config["train"]["root_dir"] = data_config["processed_data_dir"]
     
-    # Configure validation data (assuming same as train for simplicity, update if you have a separate validation set)
-    model.config["validation"]["csv_file"] = data_config["annotations_file"]
-    model.config["validation"]["root_dir"] = data_config["processed_data_dir"]
+    # TODO: Uncomment and set validation data if available,
+    # also, find a monitor metric that works well for deepforest
+    # model.config["validation"]["csv_file"] = data_config["annotations_file"]
+    # model.config["validation"]["root_dir"] = data_config["processed_data_dir"]
 
-    # Setup checkpoint callback
     checkpoint_callback = ModelCheckpoint(
         dirpath=model_config["checkpoint_dir"],
         filename="best_model-{epoch:02d}-{val_loss:.2f}",

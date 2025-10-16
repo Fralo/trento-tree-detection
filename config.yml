@@ -1,6 +1,6 @@
 data:
   raw_data_dir: "data/01_raw/label-studio-export/images/"
-  processed_data_dir: "data/02_processed/"
+  processed_data_dir: "data/02_processed/label-studio-export/images"
   annotations_file: "data/02_processed/deepforest_annotations.csv"
 
 model:

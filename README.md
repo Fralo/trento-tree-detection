@@ -25,4 +25,5 @@ This project uses the DeepForest library to train a model for tree detection in 
     Use the final trained model to make predictions on a new image.
     ```bash
     python src/predict.py --image_path /path/to/your/image.png
+    # python src/predict.py --image_path data/02_processed/all_patches_png/patch_58800_41000.png
     ```

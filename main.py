@@ -7,15 +7,23 @@ import matplotlib.pyplot as plt
 use_fine_tuned = True
 
 # source = Path("label-studio-export/images/3421ee67-patch_138200_25600.png")
-source = Path("all_patches_png/patch_58800_41000.png")
+source = Path("data/02_processed/all_patches_png/patch_58800_41000.png")
 
 
 # Load a pretrained tree detection model from Hugging Face
 
 
-def predict_fine_tuned(source: Path):
+def predict_fine_tuned_from_checkpo(source: Path):
     # Load your fine-tuned model from the best checkpoint
-    fine_tuned_model = main.deepforest.load_from_checkpoint("models/checkpoints/last.ckpt")
+    fine_tuned_model = main.deepforest.load_from_checkpoint("models_old/checkpoints/last.ckpt")
+    # fine_tuned_model.config["score_thresh"] = 0.1
+
+    img_fine_tuned = fine_tuned_model.predict_image(path=source)
+    plot_results(img_fine_tuned)
+    
+def predict_fine_tuned(source: Path):
+    # Load your fine-tuned model from pt file
+    fine_tuned_model = main.deepforest.from_pretrained("models_old/final_model.pt")
     # fine_tuned_model.config["score_thresh"] = 0.1
 
     img_fine_tuned = fine_tuned_model.predict_image(path=source)
