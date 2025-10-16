@@ -20,8 +20,8 @@ def predict(image_path: Path):
     # Create a deepforest model instance
     model = main.deepforest()
     
-    # Load the state dict of your fine-tuned pytorch model
-    model.model.load_state_dict(torch.load(model_config["final_model_path"]))
+    # Load the entire fine-tuned pytorch model (not just state dict)
+    model.model = torch.load(model_config["final_model_path"], weights_only=False)
     
     # Set the prediction score threshold
     model.config["score_thresh"] = pred_config["score_thresh"]

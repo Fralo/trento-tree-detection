@@ -27,7 +27,7 @@ def train():
     model.config["train"]["root_dir"] = data_config["processed_data_dir"]
     
     # TODO: Uncomment and set validation data if available,
-    # also, find a monitor metric that works well for deepforest
+    # also, find a monitor metric that works well for deepforest, this will cause overfitting
     # model.config["validation"]["csv_file"] = data_config["annotations_file"]
     # model.config["validation"]["root_dir"] = data_config["processed_data_dir"]
 
