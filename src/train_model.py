@@ -54,9 +54,13 @@ def train():
     print("Completed training.")
     print(f"Best model checkpoint saved at: {checkpoint_callback.best_model_path}")
 
-    final_model_path = model_config["final_model_path"]
-    print(f"Saving final model to {final_model_path}")
-    torch.save(model.model, final_model_path)
+    # Save final model with version
+    version = logger.version
+    final_model_path = Path(model_config["final_model_path"])
+    versioned_model_path = final_model_path.with_name(f"{final_model_path.stem}_v{version}{final_model_path.suffix}")
+    
+    print(f"Saving final model to {versioned_model_path}")
+    torch.save(model.model, versioned_model_path)
     print("Final model saved.")
 
 

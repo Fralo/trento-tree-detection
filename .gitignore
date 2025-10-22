@@ -97,3 +97,7 @@ lightning_logs/
 
 # Reports
 reports/
+
+
+# Label studio
+label-studio-ml-backend/*
