@@ -1,15 +1,34 @@
+from dataclasses import dataclass, asdict
 import torch
 import argparse
 from pathlib import Path
 from deepforest import main
 from config import load_config
 import pandas as pd
+import numpy as np
+import json
 
 # Load configuration
 config = load_config()
 model_config = config["model"]
 data_config = config["data"]
 pred_config = config["prediction"]
+
+
+@dataclass(frozen=True)
+class EvaluationResult:
+    model_name: str
+    avg_iou: float
+    box_recall: float
+    box_precision: float
+    
+    
+def save_results(evaluation_result: EvaluationResult, dir: Path):
+    content = json.dumps(asdict(evaluation_result))
+    dest_path = dir / f"{evaluation_result.model_name}.json"
+    
+    with open(dest_path, "w") as file:
+        file.write(content) 
 
 def evaluate(model_path: Path | None):
     """Load a fine-tuned model and evaluate it on a test set."""
@@ -46,6 +65,8 @@ def evaluate(model_path: Path | None):
     # See https://deepforest.readthedocs.io/en/latest/evaluate.html
     if "results" in results and not results["results"].empty:
         print(results["results"])
+        results_df: pd.DataFrame = results["results"]
+        results_df.to_csv(Path("evalutation_out.csv"))
     else:
         print("No evaluation results were generated. The test set might be empty or paths might be incorrect.")
 
@@ -54,6 +75,17 @@ def evaluate(model_path: Path | None):
         print(f"Box Precision: {results['box_precision']:.3f}")
     else:
         print("\nCould not calculate box recall and precision.")
+        
+    er = EvaluationResult(
+        model_name=str(model_path).split('/')[-1].split(".")[0] if model_path else "weecology_deepforest-tree",
+        avg_iou=np.average(results_df["IoU"].to_numpy()),
+        box_recall = results['box_recall'],
+        box_precision = results['box_precision'],
+    )
+    
+    save_results(er, Path("data/03_results"))
+    
+    
 
 
 if __name__ == '__main__':
