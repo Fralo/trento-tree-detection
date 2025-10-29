@@ -7,7 +7,7 @@ model:
   pretrained_model_name: "weecology/deepforest-tree"
   pretrained_model_revision: "main"
   checkpoint_dir: "models/checkpoints"
-  final_model_path: "models/final_model.pt"
+  final_model_path: "models/deepforest_ft_1.pt"
 
 training:
   accelerator: "mps" # or "gpu", "cpu"
