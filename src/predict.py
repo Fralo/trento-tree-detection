@@ -1,6 +1,6 @@
-from geopandas import GeoDataFrame
+import geopandas
+
 import torch
-import argparse
 from pathlib import Path
 from deepforest import main
 from deepforest.visualize import plot_results
@@ -8,6 +8,9 @@ from config import load_config
 import rasterio
 from rasterio.warp import transform as rio_transform
 from typing import List, Tuple
+import numpy as np
+from PIL import ImageFile, Image
+import io
 
 # Load configuration
 config = load_config()
@@ -16,7 +19,7 @@ pred_config = config["prediction"]
 
 
 def extract_tree_coordinates_from_prediction(
-    image_path: Path, predictions: GeoDataFrame
+    image_path: Path, predictions: geopandas.GeoDataFrame
 ) -> List[Tuple[float, float]]:
     """
     Extract geographic coordinates for detected trees from predictions in WGS 84 (EPSG:4326).
@@ -69,47 +72,62 @@ def extract_tree_coordinates_from_prediction(
     return coordinates
 
 
-def predict(image_path: Path):
+def predict(image: np.ndarray) -> geopandas.GeoDataFrame:
     """Load the fine-tuned model and predict on a single image."""
-    if not image_path.exists():
-        print(f"Error: Image not found at {image_path}")
-        return
+    if image is None:
+        raise ValueError("None is not allowed for argument `image`")
 
-    print("Loading fine-tuned model...")
-    # Create a deepforest model instance
     model = main.deepforest()
 
-    # Load the entire fine-tuned pytorch model (not just state dict)
     model.model = torch.load(model_config["final_model_path"], weights_only=False)
 
     # Set the prediction score threshold
     model.config["score_thresh"] = pred_config["score_thresh"]
 
-    print(f"Predicting on {image_path}...")
-    img_prediction = model.predict_image(path=str(image_path))
-    print(f"Found {len(img_prediction)} trees.")
-
-    # Extract geographic coordinates
-    tree_coordinates = extract_tree_coordinates_from_prediction(
-        image_path, img_prediction
-    )
-    print("\nTree coordinates (WGS 84 - EPSG:4326):")
-    for i, (lon, lat) in enumerate(tree_coordinates, 1):
-        print(f"  Tree {i}: ({lat:.10f},{lon:.10f})")
-
-    plot_results(img_prediction)
+    img_prediction = model.predict_image(image)
+    return img_prediction
 
 
 if __name__ == "__main__":
+    import argparse
+    import requests
+    import numpy as np
+
     parser = argparse.ArgumentParser(
         description="Predict trees in an image using a fine-tuned model."
     )
     parser.add_argument(
         "--image_path",
-        required=True,
+        required=False,
         type=Path,
         help="Path to the image for prediction.",
     )
-    args = parser.parse_args()
 
-    predict(args.image_path)
+    parser.add_argument("--image_url", required=False, type=str)
+
+    args = parser.parse_args()
+    if args.image_path:
+        img_file = Image.open(args.image_path)
+    elif args.image_url:
+        response = requests.get(args.image_url, timeout=30)
+        response.raise_for_status()
+        img_file = Image.open(io.BytesIO(response.content))
+    else:
+        raise ValueError("Either --image_path or --image_url must be provided.")
+
+    image = np.array(img_file.convert("RGB")).astype("float32")
+
+    results_gdf = predict(image)
+
+    if args.image_path:
+        results_gdf["image_path"] = args.image_path.name
+        results_gdf.root_dir = str(args.image_path.parent)
+        plot_results(results_gdf)
+        tree_coordinates = extract_tree_coordinates_from_prediction(
+            args.image_path,
+            results_gdf,
+        )
+
+        print("\nTree coordinates (WGS 84 - EPSG:4326):")
+        for i, (lon, lat) in enumerate(tree_coordinates, 1):
+            print(f"  Tree {i}: ({lat:.10f},{lon:.10f})")
