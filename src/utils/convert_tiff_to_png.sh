@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Parallel TIFF → PNG converter with a live progress bar
-# Usage: ./convert.sh <SOURCE_DIR> <DEST_DIR> [JOBS]
-# Or:    JOBS=8 ./convert.sh <SOURCE_DIR> <DEST_DIR>
+# Usage: ./convert_tiff_to_png.sh <DIRECTORY> [OUTPUT_DIR] [JOBS]
+# 
+# If OUTPUT_DIR is not provided, PNG files will be saved in the same directory as the TIFF files.
+# JOBS can be set as environment variable or 3rd argument to control parallelism.
 
 set -u
 shopt -s nullglob
@@ -43,30 +45,47 @@ cleanup() {
 trap cleanup INT TERM
 
 SOURCE_DIR=${1:-}
-DEST_DIR=${2:-}
+DEST_DIR=${2:-$SOURCE_DIR}  # Default to same directory if not specified
 
-if [[ -z ${SOURCE_DIR} || -z ${DEST_DIR} ]]; then
-  echo "Usage: $0 <source_dir> <dest_dir> [jobs]" >&2
+if [[ -z ${SOURCE_DIR} ]]; then
+  echo "Usage: $0 <directory> [output_dir] [jobs]" >&2
+  echo "" >&2
+  echo "Arguments:" >&2
+  echo "  directory   - Directory containing .tif/.tiff files to convert" >&2
+  echo "  output_dir  - (Optional) Directory to save PNG files (default: same as input)" >&2
+  echo "  jobs        - (Optional) Number of parallel jobs (default: number of CPUs)" >&2
   exit 1
 fi
+
 if [[ ! -d $SOURCE_DIR ]]; then
-  echo "Source directory does not exist: $SOURCE_DIR" >&2
-  exit 1
-fi
-if ! command -v tiff2png >/dev/null 2>&1; then
-  echo "tiff2png not found. Install it (e.g. 'brew install libtiff')." >&2
+  echo "Error: Directory does not exist: $SOURCE_DIR" >&2
   exit 1
 fi
 
-# Collect files (top-level of SOURCE_DIR). Add/keep uppercase variants.
+if ! command -v tiff2png >/dev/null 2>&1; then
+  echo "Error: tiff2png not found. It should already be installed (comes with libtiff)." >&2
+  echo "       If missing, install with: brew install libtiff" >&2
+  exit 1
+fi
+
+# Collect files (supports both .tif and .tiff extensions, case-insensitive)
 files=( "$SOURCE_DIR"/*.tif "$SOURCE_DIR"/*.tiff "$SOURCE_DIR"/*.TIF "$SOURCE_DIR"/*.TIFF )
 len=${#files[@]}
+
 if (( len == 0 )); then
-  echo "No TIFF files found in $SOURCE_DIR." >&2
+  echo "No TIFF files found in $SOURCE_DIR" >&2
   exit 0
 fi
 
-printf "Converting %d files with %d parallel jobs...\n" "$len" "$JOBS"
+# Create output directory if needed
+mkdir -p "$DEST_DIR"
+
+printf "Found %d TIFF file(s) in %s\n" "$len" "$SOURCE_DIR"
+printf "Converting with %d parallel job(s)...\n" "$JOBS"
+if [[ "$DEST_DIR" != "$SOURCE_DIR" ]]; then
+  printf "Output directory: %s\n" "$DEST_DIR"
+fi
+printf "\n"
 
 completed=0
 failed=0
@@ -101,9 +120,10 @@ while (( running > 0 )); do
   progress_bar "$completed" "$len"
 done
 
-printf "\n"
+printf "\n\n"
 if (( failed > 0 )); then
   echo "Done: $((len - failed)) succeeded, $failed failed."
+  exit 1
 else
-  echo "Conversion complete! Converted $len files."
+  echo "✓ Conversion complete! Converted $len file(s) to PNG."
 fi

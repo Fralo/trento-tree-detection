@@ -103,3 +103,6 @@ reports/
 label-studio-ml-backend/*
 label-studio-ml-backend
 test_data/*
+
+# Opencode
+.opencode/*

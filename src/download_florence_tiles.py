@@ -4,10 +4,54 @@ from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 
 
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __str__(self):
+        return f"point_{self.x}_{self.y}"
+
+
+class Tile:
+    def __init__(self, point: Point, bbox_step: int = 80, prefix: str = "data/01_raw/florence"):
+        self.point = point
+        self.bbox_step = bbox_step
+        self.prefix = prefix
+
+    def __str__(self):
+        return f"{self.point}"
+
+    @property
+    def bbox(self):
+        return self.coordinates_to_bbox(self.point, self.bbox_step)
+
+    def download(self, output_file: str | None = None):
+        if output_file is None:
+            output_file = f"zz_23_{self.point.x}_{self.point.y}.tif"
+
+        get_wms_geotiff(self.bbox, f"{self.prefix}/{output_file}")
+
+    @classmethod
+    def coordinates_to_bbox(cls, point: Point, step=80) -> list:
+        # min_x = 680012.63 - 250  # 250m to the west
+        # min_y = 4849412.92 - 250  # 250m to the south
+        # max_x = 680012.63 + 250  # 250m to the east
+        # max_y = 4849412.92 + 250  # 250m to the north
+
+        step = step / 2
+        return [
+            point.x - step,
+            point.y - step,
+            point.x + step,
+            point.y + step,
+        ]
+
+
 def get_wms_geotiff(
     bbox: List[float],
     output_filepath: str,
-    layer: str = "rt_ofc.5k24.32bit",
+    layer: str = "rt_ofc.5k23.32bit", #for 2024/25 photos use -> "rt_ofc.5k24.32bit",
     width: int = 800,
     height: int = 800,
     crs: str = "EPSG:25832",
@@ -80,7 +124,6 @@ def get_wms_geotiff(
             # (likely an error message)
             print("Error: Server did not return a GeoTIFF.")
             print(f"Response Content-Type: {content_type}")
-            # Print the error text from the server
             print(f"Server Response (first 500 chars):\n{response.text[:500]}...")
 
     except requests.exceptions.HTTPError as e:
@@ -90,50 +133,6 @@ def get_wms_geotiff(
     except requests.exceptions.RequestException as e:
         # Handle other network-related errors (e.g., connection error)
         print(f"An error occurred: {e}")
-
-
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __str__(self):
-        return f"point_{self.x}_{self.y}"
-
-
-class Tile:
-    def __init__(self, point: Point, bbox_step: int = 80, prefix: str = "test_data"):
-        self.point = point
-        self.bbox_step = bbox_step
-        self.prefix = prefix
-
-    def __str__(self):
-        return f"{self.point}"
-
-    @property
-    def bbox(self):
-        return self.coordinates_to_bbox(self.point, self.bbox_step)
-
-    def download(self, output_file: str | None = None):
-        if output_file is None:
-            output_file = f"{self.point.x}_{self.point.y}.tif"
-
-        get_wms_geotiff(self.bbox, f"{self.prefix}/{output_file}")
-
-    @classmethod
-    def coordinates_to_bbox(cls, point: Point, step=80) -> list:
-        # min_x = 680012.63 - 250  # 250m to the west
-        # min_y = 4849412.92 - 250  # 250m to the south
-        # max_x = 680012.63 + 250  # 250m to the east
-        # max_y = 4849412.92 + 250  # 250m to the north
-
-        step = step / 2
-        return [
-            point.x - step,
-            point.y - step,
-            point.x + step,
-            point.y + step,
-        ]
 
 
 def download_florence_tiles(start: Point, end: Point):
@@ -160,7 +159,7 @@ def download_florence_tiles(start: Point, end: Point):
 
 
 if __name__ == "__main__":
-    start_point = Point(679429.24, 4849095.29)
-    end_point = Point(682424.87, 4850207.81)
+    start_point = Point(674048.64,4852250.78)
+    end_point = Point(675960.26,4853751.03)
 
     download_florence_tiles(start=start_point, end=end_point)
