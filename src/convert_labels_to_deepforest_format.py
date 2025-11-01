@@ -91,10 +91,18 @@ def convert_annotations_to_deepforest_csv(annotations_dir, output_csv):
 
 if __name__ == "__main__":
     # Define paths
-    annotations_dir = "label-studio-export/Annotations"
-    output_csv = "deepforest_annotations.csv"
     
-    # Convert annotations
-    convert_annotations_to_deepforest_csv(annotations_dir, output_csv)
+    base_path = Path("data/02_processed")
+    
+    folders = ["train", "evaluate", "test"]
+    
+    for folder in folders:
+        path = base_path / folder
+        
+        annotations_dir = path / "annotations"
+        output_csv = path / "annotations.csv"
+    
+        # Convert annotations
+        convert_annotations_to_deepforest_csv(annotations_dir, output_csv)
     
     print("\nConversion complete!")
