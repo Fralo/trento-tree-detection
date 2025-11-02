@@ -14,6 +14,8 @@ model_config = config["model"]
 data_config = config["data"]
 pred_config = config["prediction"]
 
+evaluation_config = config["evaluation"]
+
 
 @dataclass(frozen=True)
 class EvaluationResult:
@@ -35,7 +37,7 @@ def evaluate(model_path: Path | None):
     if model_path and not model_path.exists():
         print(f"Error: Model not found at {model_path}")
         return
-    test_annotations_path = Path(data_config["annotations_file"])
+    test_annotations_path = Path(evaluation_config["annotations"])
     if not test_annotations_path.exists():
         print(f"Error: Test annotations file not found at {test_annotations_path}")
         return
@@ -44,18 +46,19 @@ def evaluate(model_path: Path | None):
     if model_path:
         print(f"Loading fine-tuned model from {model_path}...")
         model.model = torch.load(model_path, weights_only=False)
-        model.config["score_thresh"] = pred_config["score_thresh"]
+        model.config["score_thresh"] = evaluation_config["score_thresh"]
     else:
         print("Loading the pretrained model")
+        model_path = "weecology/deepforest-tree"
         model.load_model(model_name="weecology/deepforest-tree", revision="main")
 
-    print(f"Evaluating model on test data from {test_annotations_path}...")
+    print(f"Evaluating model {model_path} on test data from {test_annotations_path}...")
     
     # The root_dir should point to the directory where the images for evaluation are.
     # Based on your config, it is data_config["processed_data_dir"]
     results = model.evaluate(
         csv_file=str(test_annotations_path),
-        root_dir=data_config["processed_data_dir"]
+        root_dir=evaluation_config["data"]
     )
 
     print("\nEvaluation Results:")

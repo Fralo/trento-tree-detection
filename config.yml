@@ -14,6 +14,17 @@ training:
   devices: 1
   max_epochs: 20
   val_loss_monitor: "val_loss"
+  training_data: data/02_processed/train/images
+  training_annotations: data/02_processed/train/annotations
+  validation_data: data/02_processed/evaluate/images
+  validation_annotations: data/02_processed/evaluate/annotations
+  score_thresh: 0.3
+
+evaluation:
+  model: "models/deepforest_ft_1.pt"
+  data: data/02_processed/test/images
+  annotations: data/02_processed/test/annotations.csv
+  score_thresh: 0.3
 
 prediction:
   score_thresh: 0.3
