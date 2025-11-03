@@ -1,3 +1,4 @@
+from functools import lru_cache
 import geopandas
 
 import torch
@@ -71,12 +72,8 @@ def extract_tree_coordinates_from_prediction(
 
     return coordinates
 
-
-def predict(image: np.ndarray) -> geopandas.GeoDataFrame:
-    """Load the fine-tuned model and predict on a single image."""
-    if image is None:
-        raise ValueError("None is not allowed for argument `image`")
-
+@lru_cache()
+def load_model() -> main.deepforest:
     model = main.deepforest()
 
     model.model = torch.load(model_config["final_model_path"], weights_only=False)
@@ -84,7 +81,15 @@ def predict(image: np.ndarray) -> geopandas.GeoDataFrame:
 
     # Set the prediction score threshold
     model.config["score_thresh"] = pred_config["score_thresh"]
+    return model
 
+def predict(image: np.ndarray) -> geopandas.GeoDataFrame:
+    """Load the fine-tuned model and predict on a single image."""
+    if image is None:
+        raise ValueError("None is not allowed for argument `image`")
+
+    
+    model = load_model()
     img_prediction = model.predict_image(image)
     return img_prediction
 
