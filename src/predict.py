@@ -80,6 +80,7 @@ def predict(image: np.ndarray) -> geopandas.GeoDataFrame:
     model = main.deepforest()
 
     model.model = torch.load(model_config["final_model_path"], weights_only=False)
+    # model.model.load_state_dict(torch.load(model_config["final_model_path"]))
 
     # Set the prediction score threshold
     model.config["score_thresh"] = pred_config["score_thresh"]
@@ -123,11 +124,11 @@ if __name__ == "__main__":
         results_gdf["image_path"] = args.image_path.name
         results_gdf.root_dir = str(args.image_path.parent)
         plot_results(results_gdf)
-        tree_coordinates = extract_tree_coordinates_from_prediction(
-            args.image_path,
-            results_gdf,
-        )
+        # tree_coordinates = extract_tree_coordinates_from_prediction(
+        #     args.image_path,
+        #     results_gdf,
+        # )
 
-        print("\nTree coordinates (WGS 84 - EPSG:4326):")
-        for i, (lon, lat) in enumerate(tree_coordinates, 1):
-            print(f"  Tree {i}: ({lat:.10f},{lon:.10f})")
+        # print("\nTree coordinates (WGS 84 - EPSG:4326):")
+        # for i, (lon, lat) in enumerate(tree_coordinates, 1):
+        #     print(f"  Tree {i}: ({lat:.10f},{lon:.10f})")

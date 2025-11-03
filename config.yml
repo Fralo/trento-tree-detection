@@ -7,7 +7,7 @@ model:
   pretrained_model_name: "weecology/deepforest-tree"
   pretrained_model_revision: "main"
   checkpoint_dir: "models/checkpoints"
-  final_model_path: "models/deepforest_ft_1.pt"
+  final_model_path: "models/deepforest_finetuned_3.pt"
 
 training:
   accelerator: "mps" # or "gpu", "cpu"
@@ -21,7 +21,7 @@ training:
   score_thresh: 0.3
 
 evaluation:
-  model: "models/deepforest_ft_1.pt"
+  model: "models/deepforest_finetuned_3.pt"
   data: data/02_processed/test/images
   annotations: data/02_processed/test/annotations.csv
   score_thresh: 0.3
