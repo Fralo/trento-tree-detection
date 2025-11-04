@@ -266,8 +266,8 @@ if __name__ == "__main__":
     model = load_model() #for warming up the model before downloading tiles
     
     
-    
-    start_point = Point(674048.64,4852250.78)
-    end_point = Point(675960.26,4853751.03)
+
+    start_point = Point(677049.60, 4845873.31)
+    end_point = Point(687445.51, 4851771.78)
 
     download_florence_tiles(start=start_point, end=end_point)
