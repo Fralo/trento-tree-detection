@@ -23,8 +23,27 @@ def root():
 
 
 @app.get("/trees", response_model=List[Tree])
-def get_trees(db: Session = Depends(get_db)):
-    trees = db.query(TreeDB).all()
+def get_trees(
+    min_lat: float = None,
+    max_lat: float = None,
+    min_lon: float = None,
+    max_lon: float = None,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    query = db.query(TreeDB)
+
+    if min_lat is not None:
+        query = query.filter(TreeDB.latitude >= min_lat)
+    if max_lat is not None:
+        query = query.filter(TreeDB.latitude <= max_lat)
+    if min_lon is not None:
+        query = query.filter(TreeDB.longitude >= min_lon)
+    if max_lon is not None:
+        query = query.filter(TreeDB.longitude <= max_lon)
+
+    trees = query.limit(limit).all()
+    print(f"Retrieved {len(trees)} trees from the database.")
     return trees
 
 
