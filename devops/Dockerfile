@@ -8,14 +8,14 @@ RUN apt-get update && apt-get install -y \
     netcat-traditional \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY ../backend/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./app /code/app
-COPY ./alembic /code/alembic
-COPY ./alembic.ini /code/alembic.ini
-COPY ./entrypoint.sh /code/entrypoint.sh
+COPY ../backend/app /code/app
+COPY ../backend/alembic /code/alembic
+COPY ../backend/alembic.ini /code/alembic.ini
+COPY devops/entrypoint.sh /code/entrypoint.sh
 
 RUN chmod +x /code/entrypoint.sh
 

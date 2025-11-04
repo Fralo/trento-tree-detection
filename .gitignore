@@ -88,6 +88,9 @@ models/
 *.pth
 *.ckpt
 
+# Database dumps
+db_dumps/
+
 # Logs
 logs/
 lightning_logs/
