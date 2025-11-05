@@ -9,7 +9,7 @@ florence-trees.fralo.dev {
     encode gzip zstd
 
     # API routes - proxy to backend
-    handle /api/* {
+    handle_path /api/* {
         reverse_proxy backend:8000
     }
 
