@@ -9,7 +9,7 @@ import type { Tree } from '@/types/tree'
 const trees = ref<Tree[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
-const bounds = ref<LatLngBounds | null>(null)
+const bounds = ref<LatLngBounds>()
 const mapRef = shallowRef<LeafletMap | null>(null)
 
 // Florence coordinates
