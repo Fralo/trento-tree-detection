@@ -27,3 +27,21 @@ This project uses the DeepForest library to train a model for tree detection in 
     python src/predict.py --image_path /path/to/your/image.png
     # python src/predict.py --image_path data/02_processed/all_patches_png/patch_58800_41000.png
     ```
+
+## Database Management
+
+### Restore Database from Dump
+
+To restore the PostgreSQL database from a dump file:
+
+```bash
+PGPASSWORD=postgres pg_restore -h localhost -p 5432 -U postgres -d trees_db -v -c db_dumps/tree_db_20251104_192751.dump
+```
+
+**Parameters:**
+- `-h localhost`: Database host
+- `-p 5432`: Database port
+- `-U postgres`: Database user
+- `-d trees_db`: Target database name
+- `-v`: Verbose mode
+- `-c`: Clean (drop) database objects before recreating them
