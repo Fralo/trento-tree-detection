@@ -49,6 +49,9 @@ def get_trees(
 
 @app.post("/trees", response_model=Tree, status_code=201)
 def create_tree(tree: TreeCreate, db: Session = Depends(get_db)):
+    import os
+    if os.getenv("ENV") != "development":
+        raise HTTPException(status_code=403, detail="Tree creation is not allowed in production environment.")
     db_tree = TreeDB(**tree.model_dump())
     db.add(db_tree)
     db.commit()
