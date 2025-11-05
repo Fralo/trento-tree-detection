@@ -1,0 +1,5 @@
+# Ignore the built frontend files
+frontend_dist/
+
+# Ignore environment files with secrets
+.env

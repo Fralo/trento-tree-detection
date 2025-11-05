@@ -1,0 +1,60 @@
+{
+    # Global options
+    email your-email@example.com
+    # Automatic HTTPS with Let's Encrypt
+}
+
+florence-trees.fralo.dev {
+    # Enable compression
+    encode gzip zstd
+
+    # API routes - proxy to backend
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # Health check endpoint for backend
+    handle /health {
+        reverse_proxy backend:8000
+    }
+
+    # Docs endpoints
+    handle /docs* {
+        reverse_proxy backend:8000
+    }
+
+    handle /openapi.json {
+        reverse_proxy backend:8000
+    }
+
+    # Serve static frontend files
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        # Enable XSS protection
+        X-Frame-Options "SAMEORIGIN"
+        # Referrer policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Remove server header
+        -Server
+    }
+
+    # Logging
+    log {
+        output file /data/logs/access.log {
+            roll_size 100mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json
+    }
+}
